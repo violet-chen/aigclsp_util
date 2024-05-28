@@ -52,7 +52,7 @@ async def get_status(request):
         ReportStatus_URL = str(os.environ.get('ReportStatus_URL'))
     else:
         ReportStatus_URL = "http://aidrawing.ultrongw.woa.com/cluster/report_status"
-        print(f"MONITOR|INFO|Cannot find env ReportStatus_URL, use {ReportStatus_URL}")
+        print(f"Send_Status|ERROR|Cannot find env ReportStatus_URL, use {ReportStatus_URL}")
     
     data = {
             "business_id": "aidrawing",
@@ -71,14 +71,14 @@ async def get_status(request):
         for i in range(3):
             try:
                 async with session.post(ReportStatus_URL, json=json.loads(json.dumps(data))) as resp:
-                    print(f'MONITOR|INFO|send_status rsp: {await resp.text()}|data:{data}')
+                    print(f'Send_Status|ERROR|send_status rsp: {await resp.text()}|data:{data}')
                     status = resp.status
                     if status == 200:
                         message = {'message':'OK','status':200,'data':data}
                         return web.json_response(message, content_type='application/json')
             except aiohttp.ClientError as e:
                 print(f'Send_Status|ERROR|report_status err: {e}')
-                if i < 2:
+                if i < 3:
                     await asyncio.sleep(1)
                     continue
                 else:
