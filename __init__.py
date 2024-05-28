@@ -9,7 +9,7 @@ import asyncio
 from aiohttp import web
 from .nodes import NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
 
-@server.PromptServer.instance.routes.post("/aigclsp_util/send_status")
+@server.PromptServer.instance.routes.get("/aigclsp_util/send_status")
 async def get_status(request):
     # 实例id
     if os.environ.get('INSTANCE_ID'):
