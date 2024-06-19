@@ -68,7 +68,7 @@ async def get_status(request):
             "app_name":APP_NAME
             }
     async with aiohttp.ClientSession() as session:
-        for i in range(3):
+        for i in range(4):
             try:
                 async with session.post(ReportStatus_URL, json=json.loads(json.dumps(data))) as resp:
                     print(f'Send_Status|ERROR|send_status rsp: {await resp.text()}|data:{data}')
