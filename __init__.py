@@ -1,13 +1,16 @@
 import os
 import server
 import folder_paths
-import time
 import json
-import requests
-import aiohttp
 import asyncio
-from aiohttp import web
+import base64
+import uuid
+from io import BytesIO
+
+from aiohttp import web, ClientSession, WSMsgType
 from .nodes import NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
+from .core.call_comfyui import CallComfyUI
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
 @server.PromptServer.instance.routes.get("/aigclsp_util/send_status")
 async def get_status(request):
@@ -112,3 +115,41 @@ async def get_checkpoints(request):
     addr = request.match_info['addr']
     checkpoints = folder_paths.get_filename_list(addr)
     return web.json_response({addr:checkpoints}, content_type='application/json')
+
+@server.PromptServer.instance.routes.post("/aigclsp_util/comfy_workflow/image_matting")
+async def image_matting(request):
+    try:
+        data = await request.json()
+        server_address = data.get('server_address')
+        points = data.get('points')
+        client_id = data.get('client_id')
+        labels = data.get('labels')
+        input_image = data.get('input_image')
+        input_image = base64.b64decode(input_image)
+        input_image = BytesIO(input_image)
+        image_id = str(uuid.uuid4())
+        input_image.name = image_id+'.png'    
+        workflow_path = os.path.join(current_dir,'workflows','image_matting.json')
+        comfyui  =  CallComfyUI(server_address,client_id)
+        print("上传图片到input文件夹")
+        image_name = await comfyui.upload_image(input_image)
+        print("上传图片到input文件夹成功")
+        with open(workflow_path,'r') as f:
+            prompt = json.load(f)
+        prompt['5']['inputs']['image'] = image_name
+        prompt['9']['inputs']['points'] = points
+        prompt['9']['inputs']['labels'] = labels
+        # 使用 WebSocket 连接处理图像生成
+        async with ClientSession() as session:
+            async with session.ws_connect(f"ws://{server_address}/ws?clientId={client_id}") as ws:
+                final_images = await comfyui.get_images(ws, prompt)
+                if not final_images or '17' not in final_images or not final_images['17']:
+                    return web.json_response({"status": 500, "error": "Failed to process image"}, content_type="application/json")  
+                # 获取最终图像并编码为 base64 返回
+                final_image = final_images['17'][0]
+                final_image_base64 = base64.b64encode(final_image).decode('utf-8')
+                return_data = {"status": 200, "final_image": final_image_base64}
+                return web.json_response(return_data, content_type="application/json")
+
+    except Exception as e:
+        return web.json_response({"status": 500, "error": str(e)}, content_type="application/json")

@@ -1,0 +1,80 @@
+{
+  "5": {
+    "inputs": {
+      "image": "example.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "7": {
+    "inputs": {
+      "sam_model": [
+        "8",
+        0
+      ],
+      "sam_parameters": [
+        "9",
+        0
+      ],
+      "image": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "SAM Image Mask",
+    "_meta": {
+      "title": "SAM Image Mask"
+    }
+  },
+  "8": {
+    "inputs": {
+      "model_size": "ViT-H"
+    },
+    "class_type": "SAM Model Loader",
+    "_meta": {
+      "title": "SAM Model Loader"
+    }
+  },
+  "9": {
+    "inputs": {
+      "points": "[1669.3894736842105,231.74763789473684];[1612.8,498.5265852631579];[1976.5894736842106,547.0318484210527];[1410.6947368421054,983.5816421052632];[2138.2736842105264,1007.8342736842105];[1620.8842105263159,1792.0026947368422];[1677.4736842105265,2285.139536842105]",
+      "labels": "[1,1,1,1,1,1,1]"
+    },
+    "class_type": "SAM Parameters",
+    "_meta": {
+      "title": "SAM Parameters"
+    }
+  },
+  "17": {
+    "inputs": {
+      "filename_prefix": "sam",
+      "images": [
+        "18",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "18": {
+    "inputs": {
+      "image": [
+        "5",
+        0
+      ],
+      "mask": [
+        "7",
+        1
+      ]
+    },
+    "class_type": "ETN_ApplyMaskToImage",
+    "_meta": {
+      "title": "Apply Mask to Image"
+    }
+  }
+}
