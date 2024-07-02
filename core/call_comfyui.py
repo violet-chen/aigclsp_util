@@ -2,6 +2,7 @@ import aiohttp
 import json
 import asyncio
 import logging
+import ssl
 from multidict import MultiDict
 
 class CallComfyUI:
@@ -19,7 +20,7 @@ class CallComfyUI:
         }
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.post(f"http://{self.server_address}/upload/image", data=body, params=data) as response:
+                async with session.post(f"{self.server_address}/upload/image", data=body, params=data,ssl=ssl.SSLContext(ssl.PROTOCOL_TLS)) as response:
                     if response.status != 200:
                         logging.error(f"Failed to upload image: {response.status}")
                         return None
@@ -35,7 +36,7 @@ class CallComfyUI:
         data = json.dumps(p)
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.post(f"http://{self.server_address}/prompt", data=data) as response:
+                async with session.post(f"{self.server_address}/prompt", data=data,ssl=ssl.SSLContext(ssl.PROTOCOL_TLS)) as response:
                     if response.status != 200:
                         logging.error(f"Failed to queue prompt: {response.status}")
                         return None
@@ -52,7 +53,7 @@ class CallComfyUI:
         })
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.get(f"http://{self.server_address}/view", params=data) as response:
+                async with session.get(f"{self.server_address}/view", params=data,ssl=ssl.SSLContext(ssl.PROTOCOL_TLS)) as response:
                     if response.status != 200:
                         logging.error(f"Failed to get image: {response.status}")
                         return None
@@ -64,7 +65,7 @@ class CallComfyUI:
     async def get_history(self, prompt_id):
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.get(f"http://{self.server_address}/history/{prompt_id}") as response:
+                async with session.get(f"{self.server_address}/history/{prompt_id}",ssl=ssl.SSLContext(ssl.PROTOCOL_TLS)) as response:
                     if response.status != 200:
                         logging.error(f"Failed to get history: {response.status}")
                         return None
@@ -77,8 +78,6 @@ class CallComfyUI:
         prompt_data = await self.queue_prompt(prompt)
         if not prompt_data:
             return None
-        
-        prompt_id = prompt_data['prompt_id']
         output_images = {}
 
         while True:
@@ -86,28 +85,19 @@ class CallComfyUI:
                 out = await ws.receive()
                 if out.type == aiohttp.WSMsgType.TEXT:
                     message = json.loads(out.data)
-                    if message['type'] == 'executing':
+                    if message['type'] == 'executed':
                         data = message['data']
-                        if data['node'] is None and data['prompt_id'] == prompt_id:
-                            break  # 执行完成
-                else:
-                    continue  # 预览是二进制数据
+                        output = data['output']
+                        node_id = data['node']
+                        images_output = []
+                        for image in output['images']:
+                            image_data = await self.get_image(image['filename'], image['subfolder'], image['type'])
+                            if image_data:
+                                images_output.append(image_data)
+                        output_images[node_id] = images_output
+                        break
             except Exception as e:
                 logging.error(f"Error receiving WebSocket message: {str(e)}")
                 break
-
-        history_data = await self.get_history(prompt_id)
-        if not history_data:
-            return None
-        
-        history = history_data[prompt_id]
-        for node_id, node_output in history['outputs'].items():
-            if 'images' in node_output:
-                images_output = []
-                for image in node_output['images']:
-                    image_data = await self.get_image(image['filename'], image['subfolder'], image['type'])
-                    if image_data:
-                        images_output.append(image_data)
-                output_images[node_id] = images_output
 
         return output_images

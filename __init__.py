@@ -131,9 +131,7 @@ async def image_matting(request):
         input_image.name = image_id+'.png'    
         workflow_path = os.path.join(current_dir,'workflows','image_matting.json')
         comfyui  =  CallComfyUI(server_address,client_id)
-        print("上传图片到input文件夹")
         image_name = await comfyui.upload_image(input_image)
-        print("上传图片到input文件夹成功")
         with open(workflow_path,'r') as f:
             prompt = json.load(f)
         prompt['5']['inputs']['image'] = image_name
@@ -141,7 +139,7 @@ async def image_matting(request):
         prompt['9']['inputs']['labels'] = labels
         # 使用 WebSocket 连接处理图像生成
         async with ClientSession() as session:
-            async with session.ws_connect(f"ws://{server_address}/ws?clientId={client_id}") as ws:
+            async with session.ws_connect(f"{server_address}/ws?clientId={client_id}",ssl=False) as ws:
                 final_images = await comfyui.get_images(ws, prompt)
                 if not final_images or '17' not in final_images or not final_images['17']:
                     return web.json_response({"status": 500, "error": "Failed to process image"}, content_type="application/json")  
