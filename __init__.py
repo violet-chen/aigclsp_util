@@ -131,7 +131,7 @@ async def image_matting(request):
         image_id = str(uuid.uuid4())
         input_image.name = image_id+'.png'    
         workflow_path = os.path.join(current_dir,'workflows','image_matting.json')
-        comfyui  =  CallComfyUI(client_id)
+        comfyui  =  CallComfyUI(port,client_id)
         print("开始上传图片")
         image_name = await comfyui.upload_image(input_image)
         print("上传的图片的名字为: " + image_name)
