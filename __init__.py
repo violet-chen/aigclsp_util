@@ -5,6 +5,7 @@ import json
 import asyncio
 import base64
 import uuid
+import ssl
 from io import BytesIO
 
 from aiohttp import web, ClientSession, WSMsgType
@@ -119,6 +120,9 @@ async def get_checkpoints(request):
 @server.PromptServer.instance.routes.post("/aigclsp_util/comfy_workflow/image_matting")
 async def image_matting(request):
     try:
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
         data = await request.json()
         server_address = data.get('server_address')
         points = data.get('points')
@@ -130,24 +134,30 @@ async def image_matting(request):
         image_id = str(uuid.uuid4())
         input_image.name = image_id+'.png'    
         workflow_path = os.path.join(current_dir,'workflows','image_matting.json')
-        comfyui  =  CallComfyUI(server_address,client_id)
+        comfyui  =  CallComfyUI(server_address,client_id,ssl_context)
+        print("开始上传图片")
         image_name = await comfyui.upload_image(input_image)
-        with open(workflow_path,'r') as f:
-            prompt = json.load(f)
-        prompt['5']['inputs']['image'] = image_name
-        prompt['9']['inputs']['points'] = points
-        prompt['9']['inputs']['labels'] = labels
-        # 使用 WebSocket 连接处理图像生成
-        async with ClientSession() as session:
-            async with session.ws_connect(f"{server_address}/ws?clientId={client_id}",ssl=False) as ws:
-                final_images = await comfyui.get_images(ws, prompt)
-                if not final_images or '17' not in final_images or not final_images['17']:
-                    return web.json_response({"status": 500, "error": "Failed to process image"}, content_type="application/json")  
-                # 获取最终图像并编码为 base64 返回
-                final_image = final_images['17'][0]
-                final_image_base64 = base64.b64encode(final_image).decode('utf-8')
-                return_data = {"status": 200, "final_image": final_image_base64}
-                return web.json_response(return_data, content_type="application/json")
+        print("上传的图片的名字为: " + image_name)
+        if image_name:
+            with open(workflow_path,'r') as f:
+                prompt = json.load(f)
+            prompt['5']['inputs']['image'] = image_name
+            prompt['9']['inputs']['points'] = points
+            prompt['9']['inputs']['labels'] = labels
+            # 使用 WebSocket 连接处理图像生成
+            async with ClientSession() as session:
+                async with session.ws_connect(f"{server_address}/ws?clientId={client_id}",ssl=False) as ws:
+                    final_images = await comfyui.get_images(ws, prompt)
+                    if not final_images or '17' not in final_images or not final_images['17']:
+                        return web.json_response({"status": 500, "error": "Failed to process image"}, content_type="application/json")  
+                    # 获取最终图像并编码为 base64 返回
+                    final_image = final_images['17'][0]
+                    final_image_base64 = base64.b64encode(final_image).decode('utf-8')
+                    return_data = {"status": 200, "final_image": final_image_base64}
+                    return web.json_response(return_data, content_type="application/json")
+        else:
+            return_data = {"status": 500, "error": "上传图片失败"}
+            return web.json_response(return_data, content_type="application/json")
 
     except Exception as e:
         return web.json_response({"status": 500, "error": str(e)}, content_type="application/json")

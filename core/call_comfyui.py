@@ -7,9 +7,10 @@ from multidict import MultiDict
 
 class CallComfyUI:
     
-    def __init__(self, server_address, client_id):
+    def __init__(self, server_address, client_id,ssl_context):
         self.server_address = server_address
         self.client_id = client_id
+        self.ssl_context = ssl_context
 
     async def upload_image(self, image):
         body = aiohttp.FormData()
@@ -20,7 +21,7 @@ class CallComfyUI:
         }
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.post(f"{self.server_address}/upload/image", data=body, params=data,ssl=ssl.SSLContext(ssl.PROTOCOL_TLS)) as response:
+                async with session.post(f"{self.server_address}/upload/image", data=body, params=data,ssl=self.ssl_context) as response:
                     if response.status != 200:
                         logging.error(f"Failed to upload image: {response.status}")
                         return None
@@ -36,7 +37,7 @@ class CallComfyUI:
         data = json.dumps(p)
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.post(f"{self.server_address}/prompt", data=data,ssl=ssl.SSLContext(ssl.PROTOCOL_TLS)) as response:
+                async with session.post(f"{self.server_address}/prompt", data=data,ssl=self.ssl_context) as response:
                     if response.status != 200:
                         logging.error(f"Failed to queue prompt: {response.status}")
                         return None
@@ -53,7 +54,7 @@ class CallComfyUI:
         })
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.get(f"{self.server_address}/view", params=data,ssl=ssl.SSLContext(ssl.PROTOCOL_TLS)) as response:
+                async with session.get(f"{self.server_address}/view", params=data,ssl=self.ssl_context) as response:
                     if response.status != 200:
                         logging.error(f"Failed to get image: {response.status}")
                         return None
@@ -65,7 +66,7 @@ class CallComfyUI:
     async def get_history(self, prompt_id):
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.get(f"{self.server_address}/history/{prompt_id}",ssl=ssl.SSLContext(ssl.PROTOCOL_TLS)) as response:
+                async with session.get(f"{self.server_address}/history/{prompt_id}",ssl=self.ssl_context) as response:
                     if response.status != 200:
                         logging.error(f"Failed to get history: {response.status}")
                         return None
