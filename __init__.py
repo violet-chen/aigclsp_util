@@ -120,11 +120,7 @@ async def get_checkpoints(request):
 @server.PromptServer.instance.routes.post("/aigclsp_util/comfy_workflow/image_matting")
 async def image_matting(request):
     try:
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
         data = await request.json()
-        server_address = data.get('server_address')
         points = data.get('points')
         client_id = data.get('client_id')
         labels = data.get('labels')
@@ -134,7 +130,7 @@ async def image_matting(request):
         image_id = str(uuid.uuid4())
         input_image.name = image_id+'.png'    
         workflow_path = os.path.join(current_dir,'workflows','image_matting.json')
-        comfyui  =  CallComfyUI(server_address,client_id,ssl_context)
+        comfyui  =  CallComfyUI(client_id)
         print("开始上传图片")
         image_name = await comfyui.upload_image(input_image)
         print("上传的图片的名字为: " + image_name)
@@ -146,7 +142,7 @@ async def image_matting(request):
             prompt['9']['inputs']['labels'] = labels
             # 使用 WebSocket 连接处理图像生成
             async with ClientSession() as session:
-                async with session.ws_connect(f"{server_address}/ws?clientId={client_id}",ssl=False) as ws:
+                async with session.ws_connect(f"http://localhost:8188/ws?clientId={client_id}") as ws:
                     final_images = await comfyui.get_images(ws, prompt)
                     if not final_images or '17' not in final_images or not final_images['17']:
                         return web.json_response({"status": 500, "error": "Failed to process image"}, content_type="application/json")  
