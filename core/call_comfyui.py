@@ -7,7 +7,8 @@ from multidict import MultiDict
 
 class CallComfyUI:
     
-    def __init__(self, client_id):
+    def __init__(self, port,client_id):
+        self.port = port
         self.client_id = client_id
 
     async def upload_image(self, image):
@@ -19,7 +20,7 @@ class CallComfyUI:
         }
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.post(f"http://localhost:8188/upload/image", data=body, params=data) as response:
+                async with session.post(f"http://localhost:{self.port}/upload/image", data=body, params=data) as response:
                     if response.status != 200:
                         logging.error(f"Failed to upload image: {response.status}")
                         return None
@@ -35,7 +36,7 @@ class CallComfyUI:
         data = json.dumps(p)
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.post(f"http://localhost:8188/prompt", data=data) as response:
+                async with session.post(f"http://localhost:{self.port}/prompt", data=data) as response:
                     if response.status != 200:
                         logging.error(f"Failed to queue prompt: {response.status}")
                         return None
@@ -52,7 +53,7 @@ class CallComfyUI:
         })
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.get(f"http://localhost:8188/view", params=data) as response:
+                async with session.get(f"http://localhost:{self.port}/view", params=data) as response:
                     if response.status != 200:
                         logging.error(f"Failed to get image: {response.status}")
                         return None
@@ -64,7 +65,7 @@ class CallComfyUI:
     async def get_history(self, prompt_id):
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.get(f"http://localhost:8188/history/{prompt_id}") as response:
+                async with session.get(f"http://localhost:{self.port}/history/{prompt_id}") as response:
                     if response.status != 200:
                         logging.error(f"Failed to get history: {response.status}")
                         return None

@@ -125,6 +125,7 @@ async def image_matting(request):
         client_id = data.get('client_id')
         labels = data.get('labels')
         input_image = data.get('input_image')
+        port = data.get('port')
         input_image = base64.b64decode(input_image)
         input_image = BytesIO(input_image)
         image_id = str(uuid.uuid4())
@@ -142,7 +143,7 @@ async def image_matting(request):
             prompt['9']['inputs']['labels'] = labels
             # 使用 WebSocket 连接处理图像生成
             async with ClientSession() as session:
-                async with session.ws_connect(f"http://localhost:8188/ws?clientId={client_id}") as ws:
+                async with session.ws_connect(f"http://localhost:{port}/ws?clientId={client_id}") as ws:
                     final_images = await comfyui.get_images(ws, prompt)
                     if not final_images or '17' not in final_images or not final_images['17']:
                         return web.json_response({"status": 500, "error": "Failed to process image"}, content_type="application/json")  
