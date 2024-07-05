@@ -52,7 +52,7 @@
     "inputs": {
       "filename_prefix": "sam",
       "images": [
-        "18",
+        "57",
         0
       ]
     },
@@ -180,17 +180,20 @@
       "title": "Apply Mask to Image"
     }
   },
-  "53": {
+  "57": {
     "inputs": {
-      "filename_prefix": "ComfyUI",
-      "images": [
+      "image1": [
+        "18",
+        0
+      ],
+      "image2": [
         "52",
         0
       ]
     },
-    "class_type": "SaveImage",
+    "class_type": "ImageBatch",
     "_meta": {
-      "title": "Save Image"
+      "title": "Batch Images"
     }
   }
 }
