@@ -61,109 +61,6 @@
       "title": "Save Image"
     }
   },
-  "18": {
-    "inputs": {
-      "image": [
-        "5",
-        0
-      ],
-      "mask": [
-        "49",
-        0
-      ]
-    },
-    "class_type": "ETN_ApplyMaskToImage",
-    "_meta": {
-      "title": "Apply Mask to Image"
-    }
-  },
-  "38": {
-    "inputs": {
-      "mask": [
-        "7",
-        1
-      ]
-    },
-    "class_type": "InvertMask",
-    "_meta": {
-      "title": "InvertMask"
-    }
-  },
-  "40": {
-    "inputs": {
-      "brightness": 0.5,
-      "contrast": 1,
-      "saturation": 1,
-      "hue": 0.5,
-      "gamma": 1,
-      "sharpness": 1,
-      "red": 1,
-      "green": 1,
-      "blue": 1,
-      "images": [
-        "42",
-        0
-      ]
-    },
-    "class_type": "ImageEffectsAdjustment",
-    "_meta": {
-      "title": "ImageEffectsAdjustment"
-    }
-  },
-  "42": {
-    "inputs": {
-      "mask": [
-        "38",
-        0
-      ]
-    },
-    "class_type": "MaskToImage",
-    "_meta": {
-      "title": "Mask To Image (mtb)"
-    }
-  },
-  "47": {
-    "inputs": {
-      "channel": "red",
-      "image": [
-        "40",
-        0
-      ]
-    },
-    "class_type": "ImageToMask",
-    "_meta": {
-      "title": "Convert Image to Mask"
-    }
-  },
-  "48": {
-    "inputs": {
-      "channel": "red",
-      "image": [
-        "7",
-        0
-      ]
-    },
-    "class_type": "ImageToMask",
-    "_meta": {
-      "title": "Convert Image to Mask"
-    }
-  },
-  "49": {
-    "inputs": {
-      "masks_a": [
-        "48",
-        0
-      ],
-      "masks_b": [
-        "47",
-        0
-      ]
-    },
-    "class_type": "Masks Add",
-    "_meta": {
-      "title": "Masks Add"
-    }
-  },
   "52": {
     "inputs": {
       "image": [
@@ -183,7 +80,7 @@
   "57": {
     "inputs": {
       "image1": [
-        "18",
+        "65",
         0
       ],
       "image2": [
@@ -194,6 +91,36 @@
     "class_type": "ImageBatch",
     "_meta": {
       "title": "Batch Images"
+    }
+  },
+  "59": {
+    "inputs": {
+      "blend_factor": 0.5,
+      "blend_mode": "multiply",
+      "image1": [
+        "5",
+        0
+      ],
+      "image2": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "ImageBlend",
+    "_meta": {
+      "title": "ImageBlend"
+    }
+  },
+  "65": {
+    "inputs": {
+      "images": [
+        "59",
+        0
+      ]
+    },
+    "class_type": "AlphaChanelAdd",
+    "_meta": {
+      "title": "AlphaChanelAdd"
     }
   }
 }

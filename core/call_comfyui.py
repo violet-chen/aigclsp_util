@@ -32,7 +32,7 @@ class CallComfyUI:
                 return None
 
     async def queue_prompt(self, prompt):
-        p = {"prompt": prompt, "client_id": self.client_id}
+        p = {"prompt": prompt, "client_id": self.client_id,"extra":{"pipeline_name":"aigclsp_util"}}
         data = json.dumps(p)
         async with aiohttp.ClientSession() as session:
             try:
