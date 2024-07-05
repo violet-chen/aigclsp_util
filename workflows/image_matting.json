@@ -40,8 +40,8 @@
   },
   "9": {
     "inputs": {
-      "points": "[1669.3894736842105,231.74763789473684];[1612.8,498.5265852631579];[1976.5894736842106,547.0318484210527];[1410.6947368421054,983.5816421052632];[2138.2736842105264,1007.8342736842105];[1620.8842105263159,1792.0026947368422];[1677.4736842105265,2285.139536842105]",
-      "labels": "[1,1,1,1,1,1,1]"
+      "points": "[[441, 321];[361, 423];[285, 619];[281, 725];[290, 530];[356, 765];[316, 832];[565, 294]]",
+      "labels": "[1, 1, 1, 1, 1, 1, 1, 1]"
     },
     "class_type": "SAM Parameters",
     "_meta": {
@@ -68,6 +68,109 @@
         0
       ],
       "mask": [
+        "49",
+        0
+      ]
+    },
+    "class_type": "ETN_ApplyMaskToImage",
+    "_meta": {
+      "title": "Apply Mask to Image"
+    }
+  },
+  "38": {
+    "inputs": {
+      "mask": [
+        "7",
+        1
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
+    }
+  },
+  "40": {
+    "inputs": {
+      "brightness": 0.5,
+      "contrast": 1,
+      "saturation": 1,
+      "hue": 0.5,
+      "gamma": 1,
+      "sharpness": 1,
+      "red": 1,
+      "green": 1,
+      "blue": 1,
+      "images": [
+        "42",
+        0
+      ]
+    },
+    "class_type": "ImageEffectsAdjustment",
+    "_meta": {
+      "title": "ImageEffectsAdjustment"
+    }
+  },
+  "42": {
+    "inputs": {
+      "mask": [
+        "38",
+        0
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "Mask To Image (mtb)"
+    }
+  },
+  "47": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "40",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "48": {
+    "inputs": {
+      "channel": "red",
+      "image": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "Convert Image to Mask"
+    }
+  },
+  "49": {
+    "inputs": {
+      "masks_a": [
+        "48",
+        0
+      ],
+      "masks_b": [
+        "47",
+        0
+      ]
+    },
+    "class_type": "Masks Add",
+    "_meta": {
+      "title": "Masks Add"
+    }
+  },
+  "52": {
+    "inputs": {
+      "image": [
+        "5",
+        0
+      ],
+      "mask": [
         "7",
         1
       ]
@@ -75,6 +178,19 @@
     "class_type": "ETN_ApplyMaskToImage",
     "_meta": {
       "title": "Apply Mask to Image"
+    }
+  },
+  "53": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "52",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
     }
   }
 }

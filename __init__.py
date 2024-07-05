@@ -148,9 +148,11 @@ async def image_matting(request):
                     if not final_images or '17' not in final_images or not final_images['17']:
                         return web.json_response({"status": 500, "error": "Failed to process image"}, content_type="application/json")  
                     # 获取最终图像并编码为 base64 返回
-                    final_image = final_images['17'][0]
+                    final_image = final_images['53'][0]
                     final_image_base64 = base64.b64encode(final_image).decode('utf-8')
-                    return_data = {"status": 200, "final_image": final_image_base64}
+                    translucent_image = final_images['17'][0]
+                    translucent_image_base64 = base64.b64encode(translucent_image).decode('utf-8')
+                    return_data = {"status": 200, "final_image": final_image_base64,'translucent_image': translucent_image_base64}
                     return web.json_response(return_data, content_type="application/json")
         else:
             return_data = {"status": 500, "error": "上传图片失败"}
