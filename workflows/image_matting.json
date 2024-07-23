@@ -1,7 +1,7 @@
 {
   "5": {
     "inputs": {
-      "image": "example.png",
+      "image": "d696efd0-69b0-4ed6-a373-79e2869f00ab_0_2.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -80,7 +80,7 @@
   "57": {
     "inputs": {
       "image1": [
-        "65",
+        "119",
         0
       ],
       "image2": [
@@ -93,34 +93,105 @@
       "title": "Batch Images"
     }
   },
-  "59": {
+  "68": {
     "inputs": {
-      "blend_factor": 0.5,
-      "blend_mode": "multiply",
-      "image1": [
-        "5",
-        0
+      "width": [
+        "121",
+        4
       ],
-      "image2": [
-        "7",
+      "height": [
+        "121",
+        5
+      ],
+      "red": 196,
+      "green": 0,
+      "blue": 196,
+      "alpha": 1
+    },
+    "class_type": "ImageContainer",
+    "_meta": {
+      "title": "ImageContainer"
+    }
+  },
+  "76": {
+    "inputs": {
+      "image": [
+        "79",
         0
       ]
     },
-    "class_type": "ImageBlend",
+    "class_type": "ImageInvert",
     "_meta": {
-      "title": "ImageBlend"
+      "title": "Invert Image"
     }
   },
-  "65": {
+  "78": {
     "inputs": {
       "images": [
-        "59",
+        "68",
+        0
+      ]
+    },
+    "class_type": "AlphaChanelRemove",
+    "_meta": {
+      "title": "AlphaChanelRemove"
+    }
+  },
+  "79": {
+    "inputs": {
+      "mask": [
+        "7",
+        1
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "Mask To Image (mtb)"
+    }
+  },
+  "116": {
+    "inputs": {
+      "blend_percentage": 0.5,
+      "image_a": [
+        "5",
+        0
+      ],
+      "image_b": [
+        "78",
+        0
+      ],
+      "mask": [
+        "76",
+        0
+      ]
+    },
+    "class_type": "Image Blend by Mask",
+    "_meta": {
+      "title": "Image Blend by Mask"
+    }
+  },
+  "119": {
+    "inputs": {
+      "images": [
+        "116",
         0
       ]
     },
     "class_type": "AlphaChanelAdd",
     "_meta": {
       "title": "AlphaChanelAdd"
+    }
+  },
+  "121": {
+    "inputs": {
+      "image": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "Image Size to Number",
+    "_meta": {
+      "title": "Image Size to Number"
     }
   }
 }
