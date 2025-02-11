@@ -1,3 +1,4 @@
+import importlib
 import os
 import server
 import folder_paths
@@ -5,14 +6,32 @@ import json
 import asyncio
 import base64
 import uuid
-import ssl
+import requests
 from io import BytesIO
-
-from aiohttp import web, ClientSession, WSMsgType
-from .nodes import NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
+import subprocess
+import aiohttp
+from aiohttp import web, ClientSession
 from .core.call_comfyui import CallComfyUI
+try:
+    from psd_tools import PSDImage
+except:
+    pass
+
+# 导入自定义节点
+node_list = [
+    "common"
+]
+NODE_CLASS_MAPPINGS = {}
+NODE_DISPLAY_NAME_MAPPINGS = {}
+for module_name in node_list:
+    imported_module = importlib.import_module(".nodes.{}".format(module_name), __name__)
+    NODE_CLASS_MAPPINGS = {**NODE_CLASS_MAPPINGS, **imported_module.NODE_CLASS_MAPPINGS}
+    NODE_DISPLAY_NAME_MAPPINGS = {**NODE_DISPLAY_NAME_MAPPINGS, **imported_module.NODE_DISPLAY_NAME_MAPPINGS}
+__all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
+# 自定义接口
 @server.PromptServer.instance.routes.get("/aigclsp_util/send_status")
 async def get_status(request):
     # 实例id
@@ -132,10 +151,10 @@ async def image_matting(request):
         input_image.name = image_id+'.png'    
         workflow_path = os.path.join(current_dir,'workflows','image_matting.json')
         comfyui  =  CallComfyUI(port,client_id)
-        print("开始上传图片")
+        # 上传图片到服务器
         image_name = await comfyui.upload_image(input_image)
-        print("上传的图片的名字为: " + image_name)
         if image_name:
+            # 编辑comfyui工作流
             with open(workflow_path,'r') as f:
                 prompt = json.load(f)
             prompt['5']['inputs']['image'] = image_name
@@ -160,3 +179,130 @@ async def image_matting(request):
 
     except Exception as e:
         return web.json_response({"status": 500, "error": str(e)}, content_type="application/json")
+    
+
+@server.PromptServer.instance.routes.post("/aigclsp_util/comfy_workflow")
+async def comfyui_workflow(request):
+    # 通过接口调用执行comfyui工作流
+    try:
+        data = await request.json()
+        client_id= str(uuid.uuid4())
+        port = data.get('port','8081')
+        prompt = data.get('prompt',{}) # 必传,comfyui工作流,dict格式
+        upload_images = data.get('upload_images',{}) # 上传的图片,{图片对应的工作流中的id,图片base64}
+        result_id = data.get('result_id','') # 必传,工作流执行时最终结果的id
+        pipeline_name = data.get('pipeline_name','aigclsp_util') # 必传,工作流名称
+        if prompt:
+            comfyui = CallComfyUI(port,client_id)
+            if upload_images:
+                for image_id, image_base64 in upload_images.items():
+                    image_name = await comfyui.upload_image(BytesIO(base64.b64decode(image_base64)))
+                    prompt[image_id]['inputs']['image'] = image_name
+            async with ClientSession() as session:
+                async with session.ws_connect(f"http://localhost:{port}/ws?clientId={client_id}") as ws:
+                    result_datas = await comfyui.get_images(ws, prompt,pipeline_name=pipeline_name)
+                    # 如果又报错就返回报错信息
+                    if isinstance(result_datas, str):
+                        return web.json_response({"status": 500, "error": result_datas}, content_type="application/json")   
+                    else:
+                        result_datas = result_datas.get(result_id,[])
+                        if isinstance(result_datas, dict):
+                            # 如果最终数据是字典,表示返回结果不是图片,则直接返回
+                            return_data = {"status": 200, "result_datas": result_datas}
+                            return web.json_response(return_data, content_type="application/json")
+                        else:
+                            # 将图片数据列表转换为base64列表
+                            result_datas = [base64.b64encode(x).decode('utf-8') if isinstance(x, bytes) else x 
+                                            for x in result_datas ]
+
+                            return_data = {"status": 200, "result_datas": result_datas}
+                            return web.json_response(return_data, content_type="application/json")
+        
+    except Exception as e:
+        return web.json_response({"status": 500, "error": str(e)}, content_type="application/json")
+
+@server.PromptServer.instance.routes.post("/aigclsp_util/png2psd")
+async def png2psd(request):
+    try:
+        data = await request.json()
+        pngName_pngBase64:dict = data.get('pngs') # {png_name:png_base64}
+        if pngName_pngBase64:
+            # 生成临时文件
+            temp_uuid = str(uuid.uuid4())
+            temp_dir_path = os.path.join(current_dir, 'temp_dir_' + temp_uuid)
+            if not os.path.exists(temp_dir_path):
+                os.makedirs(temp_dir_path)
+            temp_psd_path = os.path.join(temp_dir_path, temp_uuid+'.psd')
+            temp_pngs_str = [] # '-label', 'layer0', 'path/layer0.png'
+            temp_pngs_path = []
+            psd_layer_names = [] # 命令行工具不支持中文,因此需要获取名称列表,通过psd-tools去二次修改
+            pngs_num_str = ','.join(str(i) for i in range(len(pngName_pngBase64))) # 如果是3就对应0,1,2 是2就对应0,1
+            for png_name,png_data_base64 in pngName_pngBase64.items():
+                png_data = base64.b64decode(png_data_base64)
+                png_temp_path = os.path.join(temp_dir_path, png_name+'.png')
+                with open(png_temp_path, 'wb') as f:
+                    f.write(png_data)
+                # 每个png图片对应的名字和路径的
+                temp_pngs_str.append('-label')
+                temp_pngs_str.append(png_name)
+                psd_layer_names.append(png_name)
+                temp_pngs_str.append(png_temp_path)
+                
+                temp_pngs_path.append(png_temp_path)
+            # png转psd的命令行
+            cmd = ['convert'] + temp_pngs_str + ['(', '-clone', pngs_num_str, '-flatten', ')', '-insert', '0', str(temp_psd_path)]
+            print(f"[png2psd]:{cmd}")
+            subprocess.run(cmd, check=True)
+            # 修改psd文件的图层名称
+            psd = PSDImage.open(temp_psd_path)
+            for index,layer in enumerate(psd):
+                # 修改图层名称
+                layer.name = psd_layer_names[index]
+            psd.save(temp_psd_path)
+            # 得到psd文件的base64
+            with open(temp_psd_path, 'rb') as f:
+                psd_data = f.read()
+            psd_base64 = base64.b64encode(psd_data).decode('utf-8')
+            # 删除临时文件
+            for png_path in temp_pngs_path:
+                os.remove(png_path)
+            os.remove(temp_psd_path)
+            os.rmdir(temp_dir_path)
+
+            return web.json_response({"status": 200, "psd": psd_base64}, content_type="application/json")
+
+    except Exception as e:
+        return web.json_response({"status": 500, "error": str(e)}, content_type="application/json")
+    
+@server.PromptServer.instance.routes.post("/public/SD/get_data")
+async def get_data(request):
+    data = await request.json()
+    url = data.get('url',None)
+    json_data = {"url":url}
+    # 调用devcloud上的接口
+    try:
+        response = requests.post(f"http://21.0.5.34:8081/public/SD/get_data",json=json_data)
+        print(f"状态码: {response.status_code}")
+        # 检查响应状态码
+        if response.status_code == 200:
+            # 检查内容类型
+            content_type = response.headers.get('Content-Type', '')
+            if 'image' in content_type:
+                # 如果是图片，直接返回图片内容
+                print("返回图片")
+                return web.Response(body=response.content, content_type=content_type)
+            else:
+                # 如果是其他类型的数据，尝试解析为 JSON
+                try:
+                    data_param = response.json()
+                    print("返回json")
+                    return web.json_response(data_param)  # 返回 JSON 响应
+                except ValueError:
+                    print("报错")
+                    return web.json_response({"error": "响应不是有效的 JSON 格式"}, status=500)
+        else:
+            return web.json_response({"error": f"请求失败，状态码: {response.status_code}"}, status=response.status_code)
+
+    except requests.exceptions.RequestException as e:
+        print(f"请求异常: {e}")
+        return web.json_response({"error": str(e)}, status=500)

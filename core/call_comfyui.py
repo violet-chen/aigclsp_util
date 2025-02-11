@@ -31,8 +31,21 @@ class CallComfyUI:
                 logging.error(f"Error uploading image: {str(e)}")
                 return None
 
-    async def queue_prompt(self, prompt):
-        p = {"prompt": prompt, "client_id": self.client_id,"extra":{"pipeline_name":"aigclsp_util"}}
+    async def queue_prompt(self, prompt, pipeline_name='aigclsp_util'):
+        p = {
+            "prompt": prompt,
+            "client_id": self.client_id,
+            "extra_data":
+            {
+                "userid": "v_rchzhang@tencent.com",
+                "pipeline_info":
+                    {
+                        "pipeline_name": pipeline_name,
+                        "min_gpu_num": 0,
+                        "max_gpu_num": 10
+                    }
+            }
+        }
         data = json.dumps(p)
         async with aiohttp.ClientSession() as session:
             try:
@@ -74,30 +87,40 @@ class CallComfyUI:
                 logging.error(f"Error getting history: {str(e)}")
                 return None
     
-    async def get_images(self, ws, prompt):
-        prompt_data = await self.queue_prompt(prompt)
+    async def get_images(self, ws, prompt,pipeline_name='aigclsp_util'):
+        prompt_data = await self.queue_prompt(prompt,pipeline_name)
         if not prompt_data:
             return None
-        output_images = {}
+        output_datas = {}
 
         while True:
             try:
                 out = await ws.receive()
                 if out.type == aiohttp.WSMsgType.TEXT:
                     message = json.loads(out.data)
+                    if message['type'] == 'execution_error':
+                        error_message = message['data'].get('exception_message','Unknown error occurred.')
+                        logging.error(f"Error executing prompt: {error_message}")
+                        return error_message
+                        
                     if message['type'] == 'executed':
                         data = message['data']
                         output = data['output']
                         node_id = data['node']
+                        workflow_images_output = output.get('images',[]) # 工作流的最终图片输出
                         images_output = []
-                        for image in output['images']:
-                            image_data = await self.get_image(image['filename'], image['subfolder'], image['type'])
-                            if image_data:
-                                images_output.append(image_data)
-                        output_images[node_id] = images_output
+                        if workflow_images_output:
+                            for image in output['images']:
+                                image_data = await self.get_image(image['filename'], image['subfolder'], image['type'])
+                                if image_data:
+                                    images_output.append(image_data)
+                            output_datas[node_id] = images_output
+                        else:
+                            output_datas[node_id] = output
+
                         break
             except Exception as e:
                 logging.error(f"Error receiving WebSocket message: {str(e)}")
                 break
 
-        return output_images
+        return output_datas

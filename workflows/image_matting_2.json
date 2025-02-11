@@ -1,0 +1,1289 @@
+{
+  "last_node_id": 50,
+  "last_link_id": 60,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": {
+        "0": -29,
+        "1": 598
+      },
+      "size": {
+        "0": 315,
+        "1": 314
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            35,
+            41
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            34
+          ]
+        }
+      ],
+      "title": "原图",
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "AI图片元素分层_v_rchzhang_lightai_20240829_1724929925358.png.png",
+        "image"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "DownloadAndLoadSAM2Model",
+      "pos": {
+        "0": 1720,
+        "1": 810
+      },
+      "size": {
+        "0": 315,
+        "1": 130
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "sam2_model",
+          "type": "SAM2MODEL",
+          "links": [
+            25
+          ]
+        }
+      ],
+      "title": "SAM2模型",
+      "properties": {
+        "Node name for S&R": "DownloadAndLoadSAM2Model"
+      },
+      "widgets_values": [
+        "sam2_hiera_large.safetensors",
+        "single_image",
+        "cuda",
+        "fp32"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "Sam2Segmentation",
+      "pos": {
+        "0": 2110,
+        "1": 820
+      },
+      "size": {
+        "0": 315,
+        "1": 190
+      },
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "sam2_model",
+          "type": "SAM2MODEL",
+          "link": 25
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 26
+        },
+        {
+          "name": "bboxes",
+          "type": "BBOX",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "coordinates_positive",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "coordinates_positive"
+          },
+          "shape": 7
+        },
+        {
+          "name": "coordinates_negative",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "coordinates_negative"
+          },
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": [
+            47,
+            55
+          ],
+          "slot_index": 0
+        }
+      ],
+      "title": "坐标点",
+      "properties": {
+        "Node name for S&R": "Sam2Segmentation"
+      },
+      "widgets_values": [
+        true,
+        "",
+        "",
+        true
+      ]
+    },
+    {
+      "id": 14,
+      "type": "SaveImage",
+      "pos": {
+        "0": 4408,
+        "1": 43
+      },
+      "size": {
+        "0": 315,
+        "1": 270
+      },
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 27
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
+      "id": 22,
+      "type": "JoinImageWithAlpha",
+      "pos": {
+        "0": 2733,
+        "1": 156
+      },
+      "size": {
+        "0": 264.5999755859375,
+        "1": 46
+      },
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 28
+        },
+        {
+          "name": "alpha",
+          "type": "MASK",
+          "link": 29
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            31
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "JoinImageWithAlpha"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 26,
+      "type": "ImageBatch",
+      "pos": {
+        "0": 3825.800048828125,
+        "1": 130
+      },
+      "size": {
+        "0": 210,
+        "1": 46
+      },
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "link": 58
+        },
+        {
+          "name": "image2",
+          "type": "IMAGE",
+          "link": 31
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            27
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageBatch"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 30,
+      "type": "ImageContainer",
+      "pos": {
+        "0": 822,
+        "1": 304
+      },
+      "size": {
+        "0": 315,
+        "1": 178
+      },
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "link": 32,
+          "widget": {
+            "name": "width"
+          }
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "link": 33,
+          "widget": {
+            "name": "height"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            36
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageContainer"
+      },
+      "widgets_values": [
+        512,
+        512,
+        255,
+        255,
+        255,
+        1
+      ]
+    },
+    {
+      "id": 31,
+      "type": "MaskToImage",
+      "pos": {
+        "0": 574,
+        "1": 170
+      },
+      "size": {
+        "0": 239.40000915527344,
+        "1": 26
+      },
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 34
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            37
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MaskToImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 32,
+      "type": "Image Blend by Mask",
+      "pos": {
+        "0": 1219,
+        "1": 139
+      },
+      "size": {
+        "0": 315,
+        "1": 98
+      },
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image_a",
+          "type": "IMAGE",
+          "link": 35
+        },
+        {
+          "name": "image_b",
+          "type": "IMAGE",
+          "link": 36
+        },
+        {
+          "name": "mask",
+          "type": "IMAGE",
+          "link": 37
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            38
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Image Blend by Mask"
+      },
+      "widgets_values": [
+        1
+      ]
+    },
+    {
+      "id": 33,
+      "type": "AlphaChanelRemove",
+      "pos": {
+        "0": 1561,
+        "1": 150
+      },
+      "size": {
+        "0": 214.20001220703125,
+        "1": 26
+      },
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 38
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            26,
+            28,
+            43
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AlphaChanelRemove"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 37,
+      "type": "ImageContainer",
+      "pos": {
+        "0": 830,
+        "1": 670
+      },
+      "size": {
+        "0": 315,
+        "1": 178
+      },
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "link": 39,
+          "widget": {
+            "name": "width"
+          }
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "link": 40,
+          "widget": {
+            "name": "height"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            42
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageContainer"
+      },
+      "widgets_values": [
+        512,
+        512,
+        196,
+        0,
+        196,
+        0
+      ]
+    },
+    {
+      "id": 38,
+      "type": "Image Size to Number",
+      "pos": {
+        "0": 359,
+        "1": 588
+      },
+      "size": {
+        "0": 252,
+        "1": 126
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 41
+        }
+      ],
+      "outputs": [
+        {
+          "name": "width_num",
+          "type": "NUMBER",
+          "links": null
+        },
+        {
+          "name": "height_num",
+          "type": "NUMBER",
+          "links": null
+        },
+        {
+          "name": "width_float",
+          "type": "FLOAT",
+          "links": null
+        },
+        {
+          "name": "height_float",
+          "type": "FLOAT",
+          "links": null
+        },
+        {
+          "name": "width_int",
+          "type": "INT",
+          "links": [
+            32,
+            39,
+            50
+          ],
+          "slot_index": 4
+        },
+        {
+          "name": "height_int",
+          "type": "INT",
+          "links": [
+            33,
+            40,
+            51
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Image Size to Number"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 39,
+      "type": "AlphaChanelRemove",
+      "pos": {
+        "0": 1190,
+        "1": 660
+      },
+      "size": {
+        "0": 214.20001220703125,
+        "1": 26
+      },
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 42
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            44
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AlphaChanelRemove"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 40,
+      "type": "Image Blend by Mask",
+      "pos": {
+        "0": 3119.25732421875,
+        "1": 471.6440124511719
+      },
+      "size": {
+        "0": 315,
+        "1": 98
+      },
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image_a",
+          "type": "IMAGE",
+          "link": 43
+        },
+        {
+          "name": "image_b",
+          "type": "IMAGE",
+          "link": 44
+        },
+        {
+          "name": "mask",
+          "type": "IMAGE",
+          "link": 45
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            48
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Image Blend by Mask"
+      },
+      "widgets_values": [
+        0.5
+      ]
+    },
+    {
+      "id": 41,
+      "type": "MaskToImage",
+      "pos": {
+        "0": 2834.25732421875,
+        "1": 574.6441650390625
+      },
+      "size": {
+        "0": 239.40000915527344,
+        "1": 26
+      },
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 46
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            45
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MaskToImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 42,
+      "type": "InvertMask",
+      "pos": {
+        "0": 2470,
+        "1": 820
+      },
+      "size": {
+        "0": 210,
+        "1": 26
+      },
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 47
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            29,
+            46
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "InvertMask"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 43,
+      "type": "AlphaChanelAdd",
+      "pos": {
+        "0": 3506.25732421875,
+        "1": 453.6440124511719
+      },
+      "size": {
+        "0": 210,
+        "1": 26
+      },
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 48
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            57
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AlphaChanelAdd"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 44,
+      "type": "ImageContainer",
+      "pos": {
+        "0": 827.1827392578125,
+        "1": 1019.0355834960938
+      },
+      "size": {
+        "0": 315,
+        "1": 178
+      },
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "link": 50,
+          "widget": {
+            "name": "width"
+          }
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "link": 51,
+          "widget": {
+            "name": "height"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            49
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageContainer"
+      },
+      "widgets_values": [
+        512,
+        512,
+        11,
+        188,
+        53,
+        0
+      ]
+    },
+    {
+      "id": 45,
+      "type": "AlphaChanelRemove",
+      "pos": {
+        "0": 1187.18310546875,
+        "1": 1009.0357666015625
+      },
+      "size": {
+        "0": 214.20001220703125,
+        "1": 26
+      },
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 49
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            60
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AlphaChanelRemove"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 47,
+      "type": "Image Blend by Mask",
+      "pos": {
+        "0": 4051.5205078125,
+        "1": 470.92132568359375
+      },
+      "size": {
+        "0": 315,
+        "1": 98
+      },
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image_a",
+          "type": "IMAGE",
+          "link": 57
+        },
+        {
+          "name": "image_b",
+          "type": "IMAGE",
+          "link": 60
+        },
+        {
+          "name": "mask",
+          "type": "IMAGE",
+          "link": 53
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            54
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Image Blend by Mask"
+      },
+      "widgets_values": [
+        0.25
+      ]
+    },
+    {
+      "id": 48,
+      "type": "MaskToImage",
+      "pos": {
+        "0": 3769,
+        "1": 571
+      },
+      "size": {
+        "0": 239.40000915527344,
+        "1": 26
+      },
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 55
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            53
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MaskToImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 49,
+      "type": "AlphaChanelAdd",
+      "pos": {
+        "0": 4441.521484375,
+        "1": 450.92132568359375
+      },
+      "size": {
+        "0": 210,
+        "1": 26
+      },
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 54
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            58
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AlphaChanelAdd"
+      },
+      "widgets_values": []
+    }
+  ],
+  "links": [
+    [
+      25,
+      3,
+      0,
+      4,
+      0,
+      "SAM2MODEL"
+    ],
+    [
+      26,
+      33,
+      0,
+      4,
+      1,
+      "IMAGE"
+    ],
+    [
+      27,
+      26,
+      0,
+      14,
+      0,
+      "IMAGE"
+    ],
+    [
+      28,
+      33,
+      0,
+      22,
+      0,
+      "IMAGE"
+    ],
+    [
+      29,
+      42,
+      0,
+      22,
+      1,
+      "MASK"
+    ],
+    [
+      31,
+      22,
+      0,
+      26,
+      1,
+      "IMAGE"
+    ],
+    [
+      32,
+      38,
+      4,
+      30,
+      0,
+      "INT"
+    ],
+    [
+      33,
+      38,
+      5,
+      30,
+      1,
+      "INT"
+    ],
+    [
+      34,
+      1,
+      1,
+      31,
+      0,
+      "MASK"
+    ],
+    [
+      35,
+      1,
+      0,
+      32,
+      0,
+      "IMAGE"
+    ],
+    [
+      36,
+      30,
+      0,
+      32,
+      1,
+      "IMAGE"
+    ],
+    [
+      37,
+      31,
+      0,
+      32,
+      2,
+      "IMAGE"
+    ],
+    [
+      38,
+      32,
+      0,
+      33,
+      0,
+      "IMAGE"
+    ],
+    [
+      39,
+      38,
+      4,
+      37,
+      0,
+      "INT"
+    ],
+    [
+      40,
+      38,
+      5,
+      37,
+      1,
+      "INT"
+    ],
+    [
+      41,
+      1,
+      0,
+      38,
+      0,
+      "IMAGE"
+    ],
+    [
+      42,
+      37,
+      0,
+      39,
+      0,
+      "IMAGE"
+    ],
+    [
+      43,
+      33,
+      0,
+      40,
+      0,
+      "IMAGE"
+    ],
+    [
+      44,
+      39,
+      0,
+      40,
+      1,
+      "IMAGE"
+    ],
+    [
+      45,
+      41,
+      0,
+      40,
+      2,
+      "IMAGE"
+    ],
+    [
+      46,
+      42,
+      0,
+      41,
+      0,
+      "MASK"
+    ],
+    [
+      47,
+      4,
+      0,
+      42,
+      0,
+      "MASK"
+    ],
+    [
+      48,
+      40,
+      0,
+      43,
+      0,
+      "IMAGE"
+    ],
+    [
+      49,
+      44,
+      0,
+      45,
+      0,
+      "IMAGE"
+    ],
+    [
+      50,
+      38,
+      4,
+      44,
+      0,
+      "INT"
+    ],
+    [
+      51,
+      38,
+      5,
+      44,
+      1,
+      "INT"
+    ],
+    [
+      53,
+      48,
+      0,
+      47,
+      2,
+      "IMAGE"
+    ],
+    [
+      54,
+      47,
+      0,
+      49,
+      0,
+      "IMAGE"
+    ],
+    [
+      55,
+      4,
+      0,
+      48,
+      0,
+      "MASK"
+    ],
+    [
+      57,
+      43,
+      0,
+      47,
+      0,
+      "IMAGE"
+    ],
+    [
+      58,
+      49,
+      0,
+      26,
+      0,
+      "IMAGE"
+    ],
+    [
+      60,
+      45,
+      0,
+      47,
+      1,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "title": "保留区域,绿色填充",
+      "bounding": [
+        3761,
+        377,
+        900,
+        230
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "title": "绿色图层",
+      "bounding": [
+        817,
+        935,
+        594,
+        272
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "title": "对于透明图片,添加白色背景",
+      "bounding": [
+        564,
+        65,
+        1221,
+        427
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "title": "紫色图层",
+      "bounding": [
+        820,
+        586,
+        594,
+        272
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "title": "不保留区域,紫色填充",
+      "bounding": [
+        2824,
+        380,
+        902,
+        231
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.08347059433884,
+      "offset": [
+        -2807.067373077477,
+        306.37492046492366
+      ]
+    }
+  },
+  "version": 0.4
+}

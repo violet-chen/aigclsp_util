@@ -1,0 +1,332 @@
+{
+  "1": {
+    "inputs": {
+      "image": "AI图片元素分层_v_rchzhang_lightai_20240829_1724929925358.png.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "原图"
+    }
+  },
+  "3": {
+    "inputs": {
+      "model": "sam2_hiera_large.safetensors",
+      "segmentor": "single_image",
+      "device": "cuda",
+      "precision": "fp32"
+    },
+    "class_type": "DownloadAndLoadSAM2Model",
+    "_meta": {
+      "title": "SAM2模型"
+    }
+  },
+  "4": {
+    "inputs": {
+      "keep_model_loaded": true,
+      "individual_objects": false,
+      "sam2_model": [
+        "3",
+        0
+      ],
+      "image": [
+        "33",
+        0
+      ],
+      "coordinates_positive": "[{\"x\": 99.54032134831458, \"y\": 311.85728314606746},{\"x\": 298.49762471910117, \"y\": 429.09997977528093}]",
+      "coordinates_negative": "[{\"x\": 85.3290853932584, \"y\": 474.10222696629216}"
+    },
+    "class_type": "Sam2Segmentation",
+    "_meta": {
+      "title": "坐标点"
+    }
+  },
+  "14": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "26",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "22": {
+    "inputs": {
+      "image": [
+        "33",
+        0
+      ],
+      "alpha": [
+        "42",
+        0
+      ]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {
+      "title": "Join Image with Alpha"
+    }
+  },
+  "26": {
+    "inputs": {
+      "image1": [
+        "49",
+        0
+      ],
+      "image2": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "ImageBatch",
+    "_meta": {
+      "title": "Batch Images"
+    }
+  },
+  "30": {
+    "inputs": {
+      "width": [
+        "38",
+        4
+      ],
+      "height": [
+        "38",
+        5
+      ],
+      "red": 255,
+      "green": 255,
+      "blue": 255,
+      "alpha": 1
+    },
+    "class_type": "ImageContainer",
+    "_meta": {
+      "title": "ImageContainer"
+    }
+  },
+  "31": {
+    "inputs": {
+      "mask": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "Mask To Image (mtb)"
+    }
+  },
+  "32": {
+    "inputs": {
+      "blend_percentage": 1,
+      "image_a": [
+        "1",
+        0
+      ],
+      "image_b": [
+        "30",
+        0
+      ],
+      "mask": [
+        "31",
+        0
+      ]
+    },
+    "class_type": "Image Blend by Mask",
+    "_meta": {
+      "title": "Image Blend by Mask"
+    }
+  },
+  "33": {
+    "inputs": {
+      "images": [
+        "32",
+        0
+      ]
+    },
+    "class_type": "AlphaChanelRemove",
+    "_meta": {
+      "title": "AlphaChanelRemove"
+    }
+  },
+  "37": {
+    "inputs": {
+      "width": [
+        "38",
+        4
+      ],
+      "height": [
+        "38",
+        5
+      ],
+      "red": 196,
+      "green": 0,
+      "blue": 196,
+      "alpha": 0
+    },
+    "class_type": "ImageContainer",
+    "_meta": {
+      "title": "ImageContainer"
+    }
+  },
+  "38": {
+    "inputs": {
+      "image": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "Image Size to Number",
+    "_meta": {
+      "title": "Image Size to Number"
+    }
+  },
+  "39": {
+    "inputs": {
+      "images": [
+        "37",
+        0
+      ]
+    },
+    "class_type": "AlphaChanelRemove",
+    "_meta": {
+      "title": "AlphaChanelRemove"
+    }
+  },
+  "40": {
+    "inputs": {
+      "blend_percentage": 0.5,
+      "image_a": [
+        "33",
+        0
+      ],
+      "image_b": [
+        "39",
+        0
+      ],
+      "mask": [
+        "41",
+        0
+      ]
+    },
+    "class_type": "Image Blend by Mask",
+    "_meta": {
+      "title": "Image Blend by Mask"
+    }
+  },
+  "41": {
+    "inputs": {
+      "mask": [
+        "42",
+        0
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "Mask To Image (mtb)"
+    }
+  },
+  "42": {
+    "inputs": {
+      "mask": [
+        "4",
+        0
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
+    }
+  },
+  "43": {
+    "inputs": {
+      "images": [
+        "40",
+        0
+      ]
+    },
+    "class_type": "AlphaChanelAdd",
+    "_meta": {
+      "title": "AlphaChanelAdd"
+    }
+  },
+  "44": {
+    "inputs": {
+      "width": [
+        "38",
+        4
+      ],
+      "height": [
+        "38",
+        5
+      ],
+      "red": 11,
+      "green": 188,
+      "blue": 53,
+      "alpha": 0
+    },
+    "class_type": "ImageContainer",
+    "_meta": {
+      "title": "ImageContainer"
+    }
+  },
+  "45": {
+    "inputs": {
+      "images": [
+        "44",
+        0
+      ]
+    },
+    "class_type": "AlphaChanelRemove",
+    "_meta": {
+      "title": "AlphaChanelRemove"
+    }
+  },
+  "47": {
+    "inputs": {
+      "blend_percentage": 0.25,
+      "image_a": [
+        "43",
+        0
+      ],
+      "image_b": [
+        "45",
+        0
+      ],
+      "mask": [
+        "48",
+        0
+      ]
+    },
+    "class_type": "Image Blend by Mask",
+    "_meta": {
+      "title": "Image Blend by Mask"
+    }
+  },
+  "48": {
+    "inputs": {
+      "mask": [
+        "4",
+        0
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "Mask To Image (mtb)"
+    }
+  },
+  "49": {
+    "inputs": {
+      "images": [
+        "47",
+        0
+      ]
+    },
+    "class_type": "AlphaChanelAdd",
+    "_meta": {
+      "title": "AlphaChanelAdd"
+    }
+  }
+}
